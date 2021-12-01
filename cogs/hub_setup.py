@@ -198,7 +198,7 @@ class CreateHub(commands.Cog):
 
         hub_category = get(ctx.guild.categories, name=HUB_CATEGORY_NAME)
 
-        if HUB_LOGS_CHANNEL_NAME != "None":
+        if HUB_LOGS_CHANNEL_NAME is not None:
 
             hub_logs_channel = get(ctx.guild.channels, name=HUB_LOGS_CHANNEL_NAME)
         else:
