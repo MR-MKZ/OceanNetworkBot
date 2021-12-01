@@ -19,25 +19,25 @@ class Ticket(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        # try:
-        for file in ["bot_config/ticket_configs.json"]:
-            with open("bot_config/ticket_configs.json", "a") as f:
-                pass
-                
-        with open("bot_config/ticket_configs.json", "r") as ff:
+        try:
+            for file in ["bot_config/Databases.json"]:
+                with open("bot_config/Databases.json", "a") as f:
+                    pass
+                    
+            with open("bot_config/Databases.json", "r") as ff:
 
-            loaded = json.load(ff)
+                loaded = json.load(ff)
 
-            self.client.ticket_configs["OceanNetwork"] = [int(loaded["OceanNetwork"]["msg_id"])], [int(loaded["OceanNetwork"]["channel_id"])], [int(loaded["OceanNetwork"]["category_id"])]
-        # except:
-        #     pass                                
+                self.client.ticket_configs["ticket"] = [int(loaded["ticket"]["msg_id"])], [int(loaded["ticket"]["channel_id"])], [int(loaded["ticket"]["category_id"])]
+        except:
+            pass                                
 
         print("-----\nticket loaded")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         if payload.member.id != self.client.user.id and str(payload.emoji) == u"\U0001f4e9":
-            msg_id, channel_id, category_id = self.client.ticket_configs["OceanNetwork"]
+            msg_id, channel_id, category_id = self.client.ticket_configs["ticket"]
 
             
             try:
@@ -81,7 +81,7 @@ class Ticket(commands.Cog):
 
                     else:
                         await ticket_channel.delete()
-                        
+
             except:
 
                 if payload.message_id == msg_id:
@@ -156,21 +156,21 @@ class Ticket(commands.Cog):
 
         msg = await ctx.send(embed=ticket_embed)
 
-        self.client.ticket_configs["OceanNetwork"] = [
+        self.client.ticket_configs["ticket"] = [
             msg.id, msg.channel.id, category.id]
 
-        with open("bot_config/ticket_configs.json", "r") as ff:
+        with open("bot_config/Databases.json", "r") as ff:
             loaded = json.load(ff)
 
-        loaded["OceanNetwork"] = {}
+        loaded["ticket"] = {}
         
-        loaded["OceanNetwork"]["msg_id"] = msg.id
+        loaded["ticket"]["msg_id"] = msg.id
 
-        loaded["OceanNetwork"]["channel_id"] = ctx.channel.id
+        loaded["ticket"]["channel_id"] = ctx.channel.id
 
-        loaded["OceanNetwork"]["category_id"] = category.id
+        loaded["ticket"]["category_id"] = category.id
 
-        with open("bot_config/ticket_configs.json", "w") as f:
+        with open("bot_config/Databases.json", "w") as f:
             json.dump(loaded, f)
 
         await msg.add_reaction(u"\U0001f4e9")

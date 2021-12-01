@@ -2,7 +2,7 @@ PLAYING_STATUS = "-help" # for example Playing $help
 
 WATCHING_STATUS = "{0} members in {1}" # 0 = server member count && 1 = server name
 
-STATUS_LOOP_TIME = 10 # time is in seconds if you want change it to minutes or hours goto listener.py
+STATUS_LOOP_TIME = 60 # time is in seconds if you want change it to minutes or hours goto listener.py
 
 BADWORDS = ["fuck", "shit", "bitch"] # a list of bad words
 
