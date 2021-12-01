@@ -1,5 +1,6 @@
 discord.py
 asyncio
+aiofiles
 requests
 DiscordUtils
 motor
