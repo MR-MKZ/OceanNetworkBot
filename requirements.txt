@@ -5,3 +5,4 @@ DiscordUtils
 motor
 pathlib
 buttons
+pymongo[srv]
