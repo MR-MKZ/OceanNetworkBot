@@ -14,7 +14,7 @@ class Listeners(commands.Cog):
     
 
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(seconds=STATUS_LOOP_TIME)
     async def PresenceChanger(self):
         global x
         global count
