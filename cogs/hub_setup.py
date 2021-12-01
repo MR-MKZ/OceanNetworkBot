@@ -2,7 +2,7 @@ import asyncio
 
 import discord
 from bot_config.config import (ACTIVIE_EMPTYCHANNEL_TIMEOUT, HUB_CATEGORY_NAME,
-                               HUB_LOGS_CHANNEL_NAME, LOOP_HUB_CHEKER_TIME)
+                               HUB_LOGS_CHANNEL_NAME, LOOP_HUB_CHECKER_TIME)
 from discord.ext import commands, tasks
 from discord.utils import get
 
@@ -20,7 +20,7 @@ class CreateHub(commands.Cog):
         print("-----\nHub setup  loaded")
 
 
-    @tasks.loop(seconds=LOOP_HUB_CHEKER_TIME)
+    @tasks.loop(seconds=LOOP_HUB_CHECKER_TIME)
     async def HubChecker(self):
 
         channel_for_send = self.client.get_channel(hub_logs_channel.id)
@@ -42,8 +42,6 @@ class CreateHub(commands.Cog):
                     self.ids_list.remove(channel_id)
                     self.names_list.remove(channel.name)
                     self.member_id.remove(member_id)
-                    await asyncio.sleep(2)
-                    await dead_msg.delete()
                 else:
                     pass
             except:
