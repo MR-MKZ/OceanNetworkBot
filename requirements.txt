@@ -1,0 +1,7 @@
+discord.py
+asyncio
+requests
+DiscordUtils
+motor
+pathlib
+buttons
