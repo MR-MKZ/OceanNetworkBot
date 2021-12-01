@@ -23,7 +23,13 @@ class CreateHub(commands.Cog):
     @tasks.loop(seconds=LOOP_HUB_CHECKER_TIME)
     async def HubChecker(self):
 
-        channel_for_send = self.client.get_channel(hub_logs_channel.id)
+        if hub_logs_channel is not None:
+
+            channel_for_send = self.client.get_channel(hub_logs_channel.id)
+
+        else:
+
+            channel_for_send = None
 
         for channel_id in self.ids_list:
             channel = self.client.get_channel(channel_id)
@@ -35,13 +41,16 @@ class CreateHub(commands.Cog):
 
             # print(members)
             try:
+                if channel_for_send is not None:
 
-                if members == 0:
-                    await channel.delete()
-                    await channel_for_send.send(f"**`ویس '{channel}' به دلیل خالی بودن و نداشتن عضو پاک شد`**")
-                    self.ids_list.remove(channel_id)
-                    self.names_list.remove(channel.name)
-                    self.member_id.remove(member_id)
+                    if members == 0:
+                        await channel.delete()
+                        await channel_for_send.send(f"**`ویس '{channel}' به دلیل خالی بودن و نداشتن عضو پاک شد`**")
+                        self.ids_list.remove(channel_id)
+                        self.names_list.remove(channel.name)
+                        self.member_id.remove(member_id)
+                    else:
+                        pass
                 else:
                     pass
             except:
@@ -183,11 +192,17 @@ class CreateHub(commands.Cog):
         global user_name
         global hub_logs_channel
 
+        await ctx.channel.purge(limit=1)
+
         sender_channel = ctx.message.channel.id
 
         hub_category = get(ctx.guild.categories, name=HUB_CATEGORY_NAME)
 
-        hub_logs_channel = get(ctx.guild.channels, name=HUB_LOGS_CHANNEL_NAME)
+        if HUB_LOGS_CHANNEL_NAME != "None":
+
+            hub_logs_channel = get(ctx.guild.channels, name=HUB_LOGS_CHANNEL_NAME)
+        else:
+            hub_logs_channel = None
 
         hub_embed = discord.Embed(
             title="ساختن هاب",
