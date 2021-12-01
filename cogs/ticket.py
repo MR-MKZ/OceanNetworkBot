@@ -1,7 +1,6 @@
 
 import asyncio
 import json
-import aiofiles
 import discord
 from discord.ext.commands.errors import MissingPermissions
 from bot_config.config import (TICKET_CLOSER_TIMEOUT,
