@@ -33,7 +33,7 @@ class CreateHub(commands.Cog):
             try:
                 if members == 0:
                     await channel.delete()
-                    dead_msg = await channel_for_send.send(f"**`ویس '{channel}' به دلیل خالی بودن و نداشتن عضو پاک شد`**")
+                    await channel_for_send.send(f"**`ویس '{channel}' به دلیل خالی بودن و نداشتن عضو پاک شد`**")
                     self.ids_list.remove(channel_id)
                 else:
                     pass
