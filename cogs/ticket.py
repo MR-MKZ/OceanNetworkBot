@@ -1,5 +1,6 @@
-import asyncio
 
+import asyncio
+import json
 import aiofiles
 import discord
 from discord.ext.commands.errors import MissingPermissions
@@ -15,36 +16,36 @@ from discord.ext import commands
 class Ticket(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.ticket_configs = {}
+        self.client.ticket_configs = {}
 
     @commands.Cog.listener()
     async def on_ready(self):
-        for file in ["ticket_configs.txt"]:
-            async with aiofiles.open("ticket_configs.txt", mode="a") as temp:
+        for file in ["bot_config/ticket_configs.json"]:
+            with open("bot_config/ticket_configs.json", "a") as f:
                 pass
+            
+        with open("bot_config/ticket_configs.json", "r") as ff:
 
-        async with aiofiles.open("ticket_configs.txt", mode="r") as file:
-            lines = await file.readlines()
-            for line in lines:
-                data = line.split(" ")
-                self.ticket_configs[int(data[0])] = [int(data[1])], [int(data[2]), [int(data[3])]
-                                                                            ]
+            loaded = json.load(ff)
+
+            self.client.ticket_configs["OceanNetwork"] = [int(loaded["OceanNetwork"]["msg_id"])], [int(loaded["OceanNetwork"]["channel_id"])], [int(loaded["OceanNetwork"]["category_id"])]
+                                                   
 
         print("-----\nticket loaded")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         if payload.member.id != self.client.user.id and str(payload.emoji) == u"\U0001f4e9":
-            msg_id, channel_id, category_id = self.ticket_configs[payload.guild_id]
+            msg_id, channel_id, category_id = self.client.ticket_configs["OceanNetwork"]
 
-            if payload.message_id == msg_id:
+            if payload.message_id == msg_id[0]:
                 guild = self.client.get_guild(payload.guild_id)
 
                 for category in guild.categories:
-                    if category.id == category_id:
+                    if category.id == category_id[0]:
                         break
 
-                channel = guild.get_channel(channel_id)
+                channel = guild.get_channel(channel_id[0])
 
                 ticket_num = 1 if len(category.channels) == 0 else int(
                     category.channels[-1].name.split("-")[1]) + 1
@@ -52,7 +53,7 @@ class Ticket(commands.Cog):
 
                 await ticket_channel.set_permissions(payload.member, read_messages=True, send_messages=True)
 
-                message = await channel.fetch_message(msg_id)
+                message = await channel.fetch_message(msg_id[0])
                 await message.remove_reaction(payload.emoji, payload.member)
 
                 ticket_embed = discord.Embed(
@@ -68,7 +69,7 @@ class Ticket(commands.Cog):
                 try:
 
                     try:
-                        await self.client.wait_for("message", check=lambda m: m.channel == ticket_channel and m.author == payload.member, timeout=TICKET_CLOSER_TIMEOUT)
+                        await self.client.wait_for(timeout=TICKET_CLOSER_TIMEOUT)
                     except asyncio.TimeoutError:
                         await ticket_channel.delete()
                 except:
@@ -109,18 +110,20 @@ class Ticket(commands.Cog):
 
         msg = await ctx.send(embed=ticket_embed)
 
-        self.client.ticket_configs[ctx.guild.id] = [
+        self.client.ticket_configs["OceanNetwork"] = [
             msg.id, msg.channel.id, category.id]
+        
+        with open("bot_config/ticket_configs.json", "r") as ff:
+            loaded = json.load(ff)
+        
+        loaded["OceanNetwork"]["msg_id"] = msg.id
 
-        async with aiofiles.open("ticket_configs.txt", mode="r") as file:
-            data = await file.readlines()
+        loaded["OceanNetwork"]["channel_id"] = ctx.channel.id
 
-        async with aiofiles.open("ticket_configs.txt", mode="w") as file:
-            await file.write(f"{ctx.guild.id} {msg.id} {msg.channel.id} {category.id}\n")
+        loaded["OceanNetwork"]["category_id"] = category.id
 
-            for line in data:
-                if int(line.split(" ")[0]) != ctx.guild.id:
-                    await file.write(line)
+        with open("bot_config/ticket_configs.json", "w") as f:
+            json.dump(loaded, f)
 
         await msg.add_reaction(u"\U0001f4e9")
         ok_msg = await ctx.channel.send("سیستم تیکت با موفقیت پیکربندی شد!")

@@ -86,7 +86,7 @@ class Topics(commands.Cog):
             else:
                 if await rightPerm(ctx):
 
-                    with open("OceanNetworkBot\\bot_config\\topics.json", "r") as f:
+                    with open("bot_config/topics.json", "r") as f:
                         loaded = json.load(f)
 
                     if key.lower() in loaded:
@@ -96,7 +96,7 @@ class Topics(commands.Cog):
                         loaded[key.lower()]["description"] = description
                         loaded[key.lower()]["by"] = ctx.author.name
 
-                        with open('OceanNetworkBot\\bot_config\\topics.json', 'w') as f:
+                        with open('bot_config/topics.json', 'w') as f:
                             json.dump(loaded, f)
 
                         embed = discord.Embed(
@@ -125,7 +125,7 @@ class Topics(commands.Cog):
             else:
                 if await rightPerm(ctx):
 
-                    with open("OceanNetworkBot\\bot_config\\topics.json", "r") as f:
+                    with open("bot_config/topics.json", "r") as f:
                         loaded = json.load(f)
 
                     if not key.lower() in loaded:
@@ -135,7 +135,7 @@ class Topics(commands.Cog):
 
                         del loaded[key.lower()]
 
-                        with open('OceanNetworkBot\\bot_config\\topics.json', 'w') as f:
+                        with open('bot_config/topics.json', 'w') as f:
                             json.dump(loaded, f)
 
                         await ctx.send("این تاپیک با موفقیت حذف شد.")
@@ -148,7 +148,7 @@ class Topics(commands.Cog):
             else:
                 if await rightPerm(ctx):
 
-                    with open("OceanNetworkBot\\bot_config\\topics.json", "r") as f:
+                    with open("bot_config/topics.json", "r") as f:
                         loaded = json.load(f)
 
                     if not key.lower() in loaded:
@@ -158,7 +158,7 @@ class Topics(commands.Cog):
                         loaded[key.lower()]["description"] = description
                         loaded[key.lower()]["by"] = ctx.author.name
 
-                        with open('OceanNetworkBot\\bot_config\\topics.json', 'w') as f:
+                        with open('bot_config/topics.json', 'w') as f:
                             json.dump(loaded, f)
 
                         await ctx.send("توضیحات این تاپیک ادیت شد.")
@@ -166,7 +166,7 @@ class Topics(commands.Cog):
                     await ctx.send("دسترسی این کار برای شما وجود ندارد.")
         else:
             usage = usage.lower()
-            with open("OceanNetworkBot\\bot_config\\topics.json", "r") as f:
+            with open("bot_config/topics.json", "r") as f:
                 loaded = json.load(f)
 
             if usage in loaded:
@@ -180,7 +180,7 @@ class Topics(commands.Cog):
                 )
                 embed.set_footer(text=f"By OceanNetwork Community - {by}")
                 async with ctx.typing():
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(0.5)
                 await ctx.send(embed=embed)
             else:
                 list = []
