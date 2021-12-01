@@ -19,16 +19,18 @@ class Ticket(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        # try:
         for file in ["bot_config/ticket_configs.json"]:
             with open("bot_config/ticket_configs.json", "a") as f:
                 pass
-            
+                
         with open("bot_config/ticket_configs.json", "r") as ff:
 
             loaded = json.load(ff)
 
             self.client.ticket_configs["OceanNetwork"] = [int(loaded["OceanNetwork"]["msg_id"])], [int(loaded["OceanNetwork"]["channel_id"])], [int(loaded["OceanNetwork"]["category_id"])]
-                                                   
+        # except:
+        #     pass                                
 
         print("-----\nticket loaded")
 
@@ -37,45 +39,90 @@ class Ticket(commands.Cog):
         if payload.member.id != self.client.user.id and str(payload.emoji) == u"\U0001f4e9":
             msg_id, channel_id, category_id = self.client.ticket_configs["OceanNetwork"]
 
-            if payload.message_id == msg_id[0]:
-                guild = self.client.get_guild(payload.guild_id)
+            
+            try:
 
-                for category in guild.categories:
-                    if category.id == category_id[0]:
-                        break
+                if payload.message_id == msg_id[0]:
+                    guild = self.client.get_guild(payload.guild_id)
 
-                channel = guild.get_channel(channel_id[0])
+                    for category in guild.categories:
+                        if category.id == category_id[0]:
+                            break
 
-                ticket_num = 1 if len(category.channels) == 0 else int(
-                    category.channels[-1].name.split("-")[1]) + 1
-                ticket_channel = await category.create_text_channel(f"ticket {ticket_num}", topic=f"A channel for ticket number {ticket_num}", permission_synced=True)
+                    channel = guild.get_channel(channel_id[0])
 
-                await ticket_channel.set_permissions(payload.member, read_messages=True, send_messages=True)
+                    ticket_num = 1 if len(category.channels) == 0 else int(
+                        category.channels[-1].name.split("-")[1]) + 1
+                    ticket_channel = await category.create_text_channel(f"ticket {ticket_num}", topic=f"A channel for ticket number {ticket_num}", permission_synced=True)
 
-                message = await channel.fetch_message(msg_id[0])
-                await message.remove_reaction(payload.emoji, payload.member)
+                    await ticket_channel.set_permissions(payload.member, read_messages=True, send_messages=True)
 
-                ticket_embed = discord.Embed(
-                    title=TICKET_OPENED_TITLE_EMBED,
-                    description=TICKET_OPENED_DESCRIPTION_EMBED,
-                    colour=TICKET_OPENED_COLOR_EMBED
-                )
+                    message = await channel.fetch_message(msg_id[0])
+                    await message.remove_reaction(payload.emoji, payload.member)
 
-                ticket_msg = await ticket_channel.send(content=f"{payload.member.mention} Welcome", embed=ticket_embed)
+                    ticket_embed = discord.Embed(
+                        title=TICKET_OPENED_TITLE_EMBED,
+                        description=TICKET_OPENED_DESCRIPTION_EMBED,
+                        colour=TICKET_OPENED_COLOR_EMBED
+                    )
 
-                await ticket_msg.add_reaction(u"\U0001f512")
+                    ticket_msg = await ticket_channel.send(content=f"{payload.member.mention} Welcome", embed=ticket_embed)
 
-                try:
+                    await ticket_msg.add_reaction(u"\U0001f512")
 
                     try:
-                        await self.client.wait_for(timeout=TICKET_CLOSER_TIMEOUT)
-                    except asyncio.TimeoutError:
-                        await ticket_channel.delete()
-                except:
-                    pass
 
-                else:
-                    await ticket_channel.delete()
+                        try:
+                            await self.client.wait_for(timeout=TICKET_CLOSER_TIMEOUT)
+                        except asyncio.TimeoutError:
+                            await ticket_channel.delete()
+                    except:
+                        pass
+
+                    else:
+                        await ticket_channel.delete()
+                        
+            except:
+
+                if payload.message_id == msg_id:
+                    guild = self.client.get_guild(payload.guild_id)
+
+                    for category in guild.categories:
+                        if category.id == category_id:
+                            break
+
+                    channel = guild.get_channel(channel_id)
+
+                    ticket_num = 1 if len(category.channels) == 0 else int(
+                        category.channels[-1].name.split("-")[1]) + 1
+                    ticket_channel = await category.create_text_channel(f"ticket {ticket_num}", topic=f"A channel for ticket number {ticket_num}", permission_synced=True)
+
+                    await ticket_channel.set_permissions(payload.member, read_messages=True, send_messages=True)
+
+                    message = await channel.fetch_message(msg_id)
+                    await message.remove_reaction(payload.emoji, payload.member)
+
+                    ticket_embed = discord.Embed(
+                        title=TICKET_OPENED_TITLE_EMBED,
+                        description=TICKET_OPENED_DESCRIPTION_EMBED,
+                        colour=TICKET_OPENED_COLOR_EMBED
+                    )
+
+                    ticket_msg = await ticket_channel.send(content=f"{payload.member.mention} Welcome", embed=ticket_embed)
+
+                    await ticket_msg.add_reaction(u"\U0001f512")
+
+                    try:
+
+                        try:
+                            await self.client.wait_for(timeout=TICKET_CLOSER_TIMEOUT)
+                        except asyncio.TimeoutError:
+                            await ticket_channel.delete()
+                    except:
+                        pass
+
+                    else:
+                        await ticket_channel.delete()
         elif payload.member.id != self.client.user.id and str(payload.emoji) == u"\U0001f512":
 
             guild = self.client.get_guild(payload.guild_id)
@@ -111,9 +158,11 @@ class Ticket(commands.Cog):
 
         self.client.ticket_configs["OceanNetwork"] = [
             msg.id, msg.channel.id, category.id]
-        
+
         with open("bot_config/ticket_configs.json", "r") as ff:
             loaded = json.load(ff)
+
+        loaded["OceanNetwork"] = {}
         
         loaded["OceanNetwork"]["msg_id"] = msg.id
 
