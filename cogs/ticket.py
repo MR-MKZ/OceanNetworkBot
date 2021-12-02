@@ -2,12 +2,14 @@
 import asyncio
 import json
 import discord
+from discord import colour
 from discord.ext.commands.errors import MissingPermissions
 from bot_config.config import (TICKET_CLOSER_TIMEOUT,
                                TICKET_OPENED_COLOR_EMBED,
                                TICKET_OPENED_DESCRIPTION_EMBED,
                                TICKET_OPENED_TITLE_EMBED,
-                               REACTION_FOR_TICKET_EMBED_COLOR)
+                               REACTION_FOR_TICKET_EMBED_COLOR,
+                               REMOVE_TICKET_CHANNEL_TIMEOUT)
 from discord.ext import commands
 
 
@@ -15,7 +17,7 @@ from discord.ext import commands
 class Ticket(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.client.ticket_configs = {}
+        self.client.ticket_configs = []
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -28,7 +30,7 @@ class Ticket(commands.Cog):
 
                 loaded = json.load(ff)
 
-                self.client.ticket_configs["ticket"] = [int(loaded["ticket"]["msg_id"])], [int(loaded["ticket"]["channel_id"])], [int(loaded["ticket"]["category_id"])]
+                self.client.ticket_configs = [int(loaded["ticket"]["msg_id"]), int(loaded["ticket"]["channel_id"]), int(loaded["ticket"]["category_id"])]
         except:
             pass                                
 
@@ -37,92 +39,54 @@ class Ticket(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         if payload.member.id != self.client.user.id and str(payload.emoji) == u"\U0001f4e9":
-            msg_id, channel_id, category_id = self.client.ticket_configs["ticket"]
+            
+            msg_id = self.client.ticket_configs[0]
+
+            channel_id = self.client.ticket_configs[1]
+            
+            category_id = self.client.ticket_configs[2]
 
             
-            try:
+            if payload.message_id == msg_id:
+                guild = self.client.get_guild(payload.guild_id)
 
-                if payload.message_id == msg_id[0]:
-                    guild = self.client.get_guild(payload.guild_id)
+                for category in guild.categories:
+                    if category.id == category_id:
+                        break
 
-                    for category in guild.categories:
-                        if category.id == category_id[0]:
-                            break
+                channel = guild.get_channel(channel_id)
 
-                    channel = guild.get_channel(channel_id[0])
+                ticket_num = 1 if len(category.channels) == 0 else int(
+                    category.channels[-1].name.split("-")[1]) + 1
+                ticket_channel = await category.create_text_channel(f"ticket {ticket_num}", topic=f"A channel for ticket number {ticket_num}", permission_synced=True)
 
-                    ticket_num = 1 if len(category.channels) == 0 else int(
-                        category.channels[-1].name.split("-")[1]) + 1
-                    ticket_channel = await category.create_text_channel(f"ticket {ticket_num}", topic=f"A channel for ticket number {ticket_num}", permission_synced=True)
+                await ticket_channel.set_permissions(payload.member, read_messages=True, send_messages=True)
 
-                    await ticket_channel.set_permissions(payload.member, read_messages=True, send_messages=True)
+                message = await channel.fetch_message(msg_id)
+                await message.remove_reaction(payload.emoji, payload.member)
 
-                    message = await channel.fetch_message(msg_id[0])
-                    await message.remove_reaction(payload.emoji, payload.member)
+                ticket_embed = discord.Embed(
+                    title=TICKET_OPENED_TITLE_EMBED,
+                    description=TICKET_OPENED_DESCRIPTION_EMBED,
+                    colour=TICKET_OPENED_COLOR_EMBED
+                )
 
-                    ticket_embed = discord.Embed(
-                        title=TICKET_OPENED_TITLE_EMBED,
-                        description=TICKET_OPENED_DESCRIPTION_EMBED,
-                        colour=TICKET_OPENED_COLOR_EMBED
-                    )
+                ticket_msg = await ticket_channel.send(content=f"{payload.member.mention} Welcome", embed=ticket_embed)
 
-                    ticket_msg = await ticket_channel.send(content=f"{payload.member.mention} Welcome", embed=ticket_embed)
+                await ticket_msg.add_reaction(u"\U0001f512")
 
-                    await ticket_msg.add_reaction(u"\U0001f512")
-
-                    try:
-
-                        try:
-                            await self.client.wait_for(timeout=TICKET_CLOSER_TIMEOUT)
-                        except asyncio.TimeoutError:
-                            await ticket_channel.delete()
-                    except:
-                        pass
-
-                    else:
-                        await ticket_channel.delete()
-
-            except:
-
-                if payload.message_id == msg_id:
-                    guild = self.client.get_guild(payload.guild_id)
-
-                    for category in guild.categories:
-                        if category.id == category_id:
-                            break
-
-                    channel = guild.get_channel(channel_id)
-
-                    ticket_num = 1 if len(category.channels) == 0 else int(
-                        category.channels[-1].name.split("-")[1]) + 1
-                    ticket_channel = await category.create_text_channel(f"ticket {ticket_num}", topic=f"A channel for ticket number {ticket_num}", permission_synced=True)
-
-                    await ticket_channel.set_permissions(payload.member, read_messages=True, send_messages=True)
-
-                    message = await channel.fetch_message(msg_id)
-                    await message.remove_reaction(payload.emoji, payload.member)
-
-                    ticket_embed = discord.Embed(
-                        title=TICKET_OPENED_TITLE_EMBED,
-                        description=TICKET_OPENED_DESCRIPTION_EMBED,
-                        colour=TICKET_OPENED_COLOR_EMBED
-                    )
-
-                    ticket_msg = await ticket_channel.send(content=f"{payload.member.mention} Welcome", embed=ticket_embed)
-
-                    await ticket_msg.add_reaction(u"\U0001f512")
+                try:
 
                     try:
-
-                        try:
-                            await self.client.wait_for(timeout=TICKET_CLOSER_TIMEOUT)
-                        except asyncio.TimeoutError:
-                            await ticket_channel.delete()
-                    except:
-                        pass
-
-                    else:
+                        await self.client.wait_for(timeout=TICKET_CLOSER_TIMEOUT)
+                    except asyncio.TimeoutError:
                         await ticket_channel.delete()
+                except:
+                    pass
+
+                else:
+                    await ticket_channel.delete()
+
         elif payload.member.id != self.client.user.id and str(payload.emoji) == u"\U0001f512":
 
             guild = self.client.get_guild(payload.guild_id)
@@ -135,7 +99,31 @@ class Ticket(commands.Cog):
 
             await message.remove_reaction(payload.emoji, payload.member)
 
+            await message.remove_reaction(payload.emoji, self.client.user)
+
+            await message.delete()
+
             await asyncio.sleep(2)
+
+            perm = ticket_opened_channel.overwrites_for(payload.member)
+
+            perm.send_messages=False
+
+            await ticket_opened_channel.set_permissions(payload.member, overwrite=perm)
+
+            await ticket_opened_channel.purge(limit=1)
+
+            ticket_closed_embed = discord.Embed(
+                title="تیکت بسته شد!",
+                description=f"تیکت <#{payload.channel_id}> توسط {payload.member.mention} بسته شد!\nاین چنل تا ۲۴ ساعت دیگه به صورت خودکار پاک میشود",
+                colour=0xFF0000
+            )
+
+            ticket_closed_embed.set_footer(text="OceanNetwork Community")
+
+            await ticket_opened_channel.send(embed=ticket_closed_embed)
+
+            await asyncio.sleep(REMOVE_TICKET_CHANNEL_TIMEOUT)
 
             await ticket_opened_channel.delete()
 
@@ -156,7 +144,7 @@ class Ticket(commands.Cog):
 
         msg = await ctx.send(embed=ticket_embed)
 
-        self.client.ticket_configs["ticket"] = [
+        self.client.ticket_configs = [
             msg.id, msg.channel.id, category.id]
 
         with open("bot_config/Databases.json", "r") as ff:

@@ -34,9 +34,10 @@ class CreateHub(commands.Cog):
         print("-----\nHub setup  loaded")
 
 
-    @tasks.loop(seconds=LOOP_HUB_CHECKER_TIME)
+    @tasks.loop(minutes=LOOP_HUB_CHECKER_TIME)
     async def HubChecker(self):
         logs_id = self.client.hub_configs[3]
+        print(f"logs_id: {logs_id}")
 
         # try:
         #     if hub_logs_channel is not None:
@@ -73,56 +74,29 @@ class CreateHub(commands.Cog):
         #             pass
         # except:
 
-        try:
+        channel_for_send = self.client.get_channel(logs_id)
 
-            channel_for_send = self.client.get_channel(logs_id[0])
+        for channel_id in self.ids_list:
+            channel = self.client.get_channel(channel_id)
 
-            for channel_id in self.ids_list:
-                channel = self.client.get_channel(channel_id)
+            try:
+                members = len(channel.members)
+            except:
+                pass
 
-                try:
-                    members = len(channel.members)
-                except:
+            # print(members)
+            try:
+
+                if members == 0:
+                    await channel.delete()
+                    await channel_for_send.send(f"**`ویس '{channel}' به دلیل خالی بودن و نداشتن عضو پاک شد`**")
+                    self.ids_list.remove(channel_id)
+                    self.names_list.remove(channel.name)
+                    self.member_id.remove(member_id)
+                else:
                     pass
-
-                # print(members)
-                try:
-
-                    if members == 0:
-                        await channel.delete()
-                        await channel_for_send.send(f"**`ویس '{channel}' به دلیل خالی بودن و نداشتن عضو پاک شد`**")
-                        self.ids_list.remove(channel_id)
-                        self.names_list.remove(channel.name)
-                        self.member_id.remove(member_id)
-                    else:
-                        pass
-                except:
-                    pass
-        except:
-
-            channel_for_send = self.client.get_channel(logs_id)
-
-            for channel_id in self.ids_list:
-                channel = self.client.get_channel(channel_id)
-
-                try:
-                    members = len(channel.members)
-                except:
-                    pass
-
-                # print(members)
-                try:
-
-                    if members == 0:
-                        await channel.delete()
-                        await channel_for_send.send(f"**`ویس '{channel}' به دلیل خالی بودن و نداشتن عضو پاک شد`**")
-                        self.ids_list.remove(channel_id)
-                        self.names_list.remove(channel.name)
-                        self.member_id.remove(member_id)
-                    else:
-                        pass
-                except:
-                    pass
+            except:
+                pass
 
     
 
@@ -133,148 +107,82 @@ class CreateHub(commands.Cog):
             msg_id = self.client.hub_configs[0]
             channel_id = self.client.hub_configs[1]
             category_id = self.client.hub_configs[2]
+            print(f"msg_id: {msg_id}")
+            print(f"channel_id: {channel_id}")
+            print(f"category_id: {category_id}")
             
             global member_id
 
-            try:
-                if payload.message_id == msg_id[0]:
-                    guild = self.client.get_guild(payload.guild_id)
+            if payload.message_id == msg_id:
+                guild = self.client.get_guild(payload.guild_id)
 
-                    for category in guild.categories:
-                        if category.id == category_id[0]:
-                            break 
+                for category in guild.categories:
+                    if category.id == category_id:
+                        break 
                     
-                    print("bad az halghe for")
-                    
-
-                    user_name = payload.member.display_name
+                print("bad az halghe for 2")
                     
 
-                    member_id = payload.member.id
+                user_name = payload.member.display_name
+                    
 
-                    self.member_id.append(member_id)
+                member_id = payload.member.id
 
-                    for member in self.member_id:
-                        member_id_count = self.member_id.count(member)
+                self.member_id.append(member_id)
 
-                    if member_id_count < 2:
+                for member in self.member_id:
+                    member_id_count = self.member_id.count(member)
 
-                        print("marhale check count")
+                if member_id_count < 2:
 
-                        # category = get(payload.guild.categories, id=category_id)
+                    print("marhale check count 2")
     
-                        await category.create_voice_channel(f"{user_name} Hub")
+                    await category.create_voice_channel(f"{user_name} Hub")
 
-                        print("voice bayad sakhte shode bashe ")
+                    print("voice bayad sakhte shode bashe 2")
 
-                        voice_channel = get(guild.voice_channels,
-                                        name=f"{user_name} Hub")
+                    voice_channel = get(guild.voice_channels,
+                                    name=f"{user_name} Hub")
 
-                        id = voice_channel.id
+                    id = voice_channel.id
 
-                        name = voice_channel.name
+                    name = voice_channel.name
                                         
-                        self.ids_list.append(id)
+                    self.ids_list.append(id)
 
-                        self.names_list.append(name)
+                    self.names_list.append(name)
 
-                        channel = guild.get_channel(channel_id[0])
+                    channel = guild.get_channel(channel_id)
 
-                        message = await channel.fetch_message(msg_id[0])
+                    message = await channel.fetch_message(msg_id)
                                         
-                        await message.remove_reaction(payload.emoji, payload.member)
+                    await message.remove_reaction(payload.emoji, payload.member)
 
-                        await asyncio.sleep(ACTIVIE_EMPTYCHANNEL_TIMEOUT)
+                    # await asyncio.sleep(ACTIVIE_EMPTYCHANNEL_TIMEOUT)
+                    await asyncio.sleep(20)
 
-                        try:
-                            await self.HubChecker.start()
-                        except:
-                            pass
+                    print("sleep kar kard")
 
-                    else:
+                    try:
+                        await self.HubChecker.start()
+                    except:
+                        pass
 
-                        channel = self.client.get_channel(channel_id[0])
+                else:
+
+                    channel = self.client.get_channel(channel_id)
                             
-                        message = await channel.fetch_message(msg_id[0])
+                    message = await channel.fetch_message(msg_id)
 
-                        await message.remove_reaction(payload.emoji, payload.member)
+                    await message.remove_reaction(payload.emoji, payload.member)
 
-                        error_msg = await channel.send("شما نمی توانید بیشتر از یک هاب بسازید!")
+                    error_msg = await channel.send("شما نمی توانید بیشتر از یک هاب بسازید!")
 
-                        self.member_id.remove(member_id)
+                    self.member_id.remove(member_id)
 
-                        await asyncio.sleep(3)
+                    await asyncio.sleep(3)
 
-                        await error_msg.delete()
-            except:
-
-                if payload.message_id == msg_id:
-                    guild = self.client.get_guild(payload.guild_id)
-
-                    for category in guild.categories:
-                        if category.id == category_id:
-                            break 
-                    
-                    print("bad az halghe for 2")
-                    
-
-                    user_name = payload.member.display_name
-                    
-
-                    member_id = payload.member.id
-
-                    self.member_id.append(member_id)
-
-                    for member in self.member_id:
-                        member_id_count = self.member_id.count(member)
-
-                    if member_id_count < 2:
-
-                        print("marhale check count 2")
-    
-                        await category.create_voice_channel(f"{user_name} Hub")
-
-                        print("voice bayad sakhte shode bashe 2")
-
-                        voice_channel = get(guild.voice_channels,
-                                        name=f"{user_name} Hub")
-
-                        id = voice_channel.id
-
-                        name = voice_channel.name
-                                        
-                        self.ids_list.append(id)
-
-                        self.names_list.append(name)
-
-                        channel = guild.get_channel(channel_id)
-
-                        message = await channel.fetch_message(msg_id)
-                                        
-                        await message.remove_reaction(payload.emoji, payload.member)
-
-                        await asyncio.sleep(ACTIVIE_EMPTYCHANNEL_TIMEOUT)
-
-                        try:
-                            await self.HubChecker.start()
-                        except:
-                            pass
-
-                    else:
-
-                        channel = self.client.get_channel(channel_id)
-                            
-                        message = await channel.fetch_message(msg_id)
-
-                        await message.remove_reaction(payload.emoji, payload.member)
-
-                        error_msg = await channel.send("شما نمی توانید بیشتر از یک هاب بسازید!")
-
-                        self.member_id.remove(member_id)
-
-                        await asyncio.sleep(3)
-
-                        await error_msg.delete()
+                    await error_msg.delete()
 
                         
 
