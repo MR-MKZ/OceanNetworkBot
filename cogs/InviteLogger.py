@@ -68,6 +68,7 @@ class InviteLogger(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
+        inviter = await self.tracker.fetch_inviter(member)
         channel = discord.utils.get(member.guild.text_channels, name="bot-commands")
         data = await self.client.invites.find_by_custom(
             {"guild_id": member.guild.id, "inviter_id": inviter.id}
