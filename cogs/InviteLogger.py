@@ -77,7 +77,7 @@ class InviteLogger(commands.Cog):
             data["count"] -= 1
             data["invited_users"].remove(member.id)
             await self.client.invites.upsert_custom(
-                {"guild_id": member.guild.id, "inviter_id": inviter.id}, data
+                {"guild_id": member.guild.id}, data
             )
         except:
             pass
