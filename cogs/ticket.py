@@ -115,7 +115,7 @@ class Ticket(commands.Cog):
 
             ticket_closed_embed = discord.Embed(
                 title="تیکت بسته شد!",
-                description=f"تیکت <#{payload.channel_id}> توسط {payload.member.mention} بسته شد!\nاین چنل تا ۲۴ ساعت دیگه به صورت خودکار پاک میشود",
+                description=f"تیکت <#{payload.channel_id}> توسط {payload.member.mention} بسته شد!\nاین چنل تا ۶ ساعت دیگه به صورت خودکار پاک میشود",
                 colour=0xFF0000
             )
 
