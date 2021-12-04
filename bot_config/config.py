@@ -12,8 +12,6 @@ LOOP_HUB_CHECKER_TIME = 2 # this time is in minutes if you want change it to sec
 
 ACTIVIE_EMPTYCHANNEL_TIMEOUT = 120 # this time is in seconds and you can't change it to minutes or hours XD
 
-TICKET_CLOSER_TIMEOUT = 7200 # this time is in seconds and you can't change it to minutes or hours
-
 REMOVE_TICKET_CHANNEL_TIMEOUT = 21600 # this time is in seconds and you can't change it to minutes or hours XD 
 
 TICKET_OPENED_DESCRIPTION_EMBED = "ادمین ها به زودی تیکت شما رو بررسی میکنند\n برای بستن تیکت استیکر :lock: رو ری اکشن کنید"
