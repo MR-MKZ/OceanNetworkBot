@@ -95,34 +95,6 @@ class Ticket(commands.Cog):
 
             await ticket_opened_channel.send("درحال بستن تیکت . . .")
 
-            message = await ticket_opened_channel.fetch_message(payload.message_id)
-
-            await message.remove_reaction(payload.emoji, payload.member)
-
-            await message.remove_reaction(payload.emoji, self.client.user)
-
-            await message.delete()
-
-            await asyncio.sleep(2)
-
-            perm = ticket_opened_channel.overwrites_for(payload.member)
-
-            perm.send_messages=False
-
-            await ticket_opened_channel.set_permissions(guild.default_role, overwrite=perm)
-
-            await ticket_opened_channel.purge(limit=1)
-
-            ticket_closed_embed = discord.Embed(
-                title="تیکت بسته شد!",
-                description=f"تیکت <#{payload.channel_id}> توسط {payload.member.mention} بسته شد!\nاین چنل تا 2 ساعت دیگه به صورت خودکار پاک میشود",
-                colour=0xFF0000
-            )
-
-            ticket_closed_embed.set_footer(text="OceanNetwork Community")
-
-            await ticket_opened_channel.send(embed=ticket_closed_embed)
-
             await asyncio.sleep(REMOVE_TICKET_CHANNEL_TIMEOUT)
 
             await ticket_opened_channel.delete()
