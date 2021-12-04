@@ -109,7 +109,7 @@ class Ticket(commands.Cog):
 
             perm.send_messages=False
 
-            await ticket_opened_channel.set_permissions(overwrite=perm)
+            await ticket_opened_channel.set_permissions(ctx.guild.default_role, overwrite=perm)
 
             await ticket_opened_channel.purge(limit=1)
 
