@@ -109,13 +109,13 @@ class Ticket(commands.Cog):
 
             perm.send_messages=False
 
-            await ticket_opened_channel.set_permissions(payload.member, overwrite=perm)
+            await ticket_opened_channel.set_permissions(overwrite=perm)
 
             await ticket_opened_channel.purge(limit=1)
 
             ticket_closed_embed = discord.Embed(
                 title="تیکت بسته شد!",
-                description=f"تیکت <#{payload.channel_id}> توسط {payload.member.mention} بسته شد!\nاین چنل تا ۶ ساعت دیگه به صورت خودکار پاک میشود",
+                description=f"تیکت <#{payload.channel_id}> توسط {payload.member.mention} بسته شد!\nاین چنل تا 2 ساعت دیگه به صورت خودکار پاک میشود",
                 colour=0xFF0000
             )
 
